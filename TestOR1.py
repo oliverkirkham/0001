@@ -9,9 +9,11 @@ import os
 
 broker="192.168.11.47"
 port=1883 #broker port (default is 1883)
+Gudemacaddress="00:19:32:01:63:48" #mac address of the controlled gude
 ShutdownTopic="com/jonesav/androidscreen/shutdown"
 GudePowerTopic="com/jonesav/androidscreen/shutdown/confirm"
-PowerOnTopic="de/gudesystems/epc/EPC-8291/cmd/cli"
+PowerOnTopic="jonesav/secretbox/{}/cmd/cli".format(Gudemacaddress)
+PowerOffTopic="jonesav/secretbox/{}/cmd/cli".format(Gudemacaddress)
 shutdowndelay=1 #delay in seconds between shutdown command received and power off sent
 powerstate=2
 refresh = 5
@@ -38,7 +40,7 @@ def on_messageshutdown(client, userdata, msg,): #on shutdown message confirm rec
     print("shutdown confirm sent")
     sleep(shutdowndelay)
     print("powering off")
-    msgs = [{'topic':"de/gudesystems/epc/EPC-8291/cmd/cli", 'payload':'port all set 2'}] #after 60 seconds shut the GUDE down
+    msgs = [{'topic':PowerOffTopic, 'payload':'port all set 2'}] #after 60 seconds shut the GUDE down
     publish.multiple(msgs, hostname=broker)
     powerstate = (0) #set powerstate to 0 and shutdown before triggering other threads
     print(powerstate)
