@@ -54,7 +54,7 @@ def on_messagepoweron(client, userdata, msg): #on reciving power on message
     powerstate = (1)
     print("message received powering on:", wow, powerstate)
     client.unsubscribe(PowerOnTopic)
-    os.system("python DelayedShutdownV2.py")
+    os.system("python TestOR1.py")
     print("resetting")
     exit()
 
