@@ -9,11 +9,11 @@ import os
 
 broker="192.168.11.47"
 port=1883 #broker port (default is 1883)
-Gudemacaddress="00:19:32:01:63:48" #mac address of the controlled gude
+GudeID="OR1" #ID of the controlled gude
 ShutdownTopic="com/jonesav/androidscreen/shutdown"
 GudePowerTopic="com/jonesav/androidscreen/shutdown/confirm"
-PowerOnTopic="jonesav/secretbox/{}/cmd/cli".format(Gudemacaddress)
-PowerOffTopic="jonesav/secretbox/{}/cmd/cli".format(Gudemacaddress)
+PowerOnTopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
+PowerOffTopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
 shutdowndelay=1 #delay in seconds between shutdown command received and power off sent
 powerstate=2
 refresh = 5
