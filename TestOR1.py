@@ -12,15 +12,14 @@ port=1883 #broker port (default is 1883)
 GudeID="OR1" #ID of the controlled gude
 ShutdownTopic="com/jonesav/androidscreen/shutdown"
 GudePowerTopic="com/jonesav/androidscreen/shutdown/confirm"
-PowerOnTopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
-PowerOffTopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
+GUDEcommandtopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
 shutdowndelay=60 #delay in seconds between shutdown command received and power off sent
-powerstate=2
-refresh = 5
-KwH = 1.5
-powersaved= 0.1
-co2multi= 0.193
-cpkwh= 0.34
+powerstate=2 #powerstate of the GUDE
+refresh = 5 #refresh rate of the data on the android screen (in seconds per frame) anything lower than 5 causes weird behavior
+KwH = 1.5 #power consumption of the OR
+powersaved= 0
+co2multi= 0.193 #co2 generated per KwH
+cpkwh= 0.34 #Cost per KwH
 
 
 def on_connect(client, userdata, flags, rc): #on connecting to broker print error code
@@ -40,7 +39,7 @@ def on_messageshutdown(client, userdata, msg,): #on shutdown message confirm rec
     print("shutdown confirm sent")
     sleep(shutdowndelay)
     print("powering off")
-    msgs = [{'topic':PowerOffTopic, 'payload':'port all set 2'}] #after 60 seconds shut the GUDE down
+    msgs = [{'topic':GUDEcommandtopic, 'payload':'port all set 2'}] #after 60 seconds shut the GUDE down
     publish.multiple(msgs, hostname=broker)
     powerstate = (0) #set powerstate to 0 and shutdown before triggering other threads
     print(powerstate)
@@ -51,12 +50,20 @@ def on_messageshutdown(client, userdata, msg,): #on shutdown message confirm rec
 def on_messagepoweron(client, userdata, msg): #on reciving power on message
     global powerstate
     wow = msg.payload.decode('UTF-8')
-    powerstate = (1)
-    print("message received powering on:", wow, powerstate)
-    client.unsubscribe(PowerOnTopic)
-    os.system("python TestOR1.py")
-    print("resetting")
-    exit()
+    if wow == "port all set 1":
+        powerstate = (1)
+        msgs = [{'topic':"OliverK/test/kwh", 'payload':round(0, 2)},
+        ("OliverK/test/co2", round(0, 2), 0, False),
+        ("OliverK/test/money", round(0, 2), 0, False)]
+        publish.multiple(msgs, hostname=broker)
+        print("message received powering on:", wow, powerstate)
+        client.unsubscribe(GUDEcommandtopic)
+        print("resetting")
+        os.system("python TestOR1.py")
+        exit()
+    else :
+        print("incorred command", wow)
+        subscribingpoweron()
 
 
 def powersavingscalc(powersaved): #power savings calculation
@@ -89,7 +96,7 @@ def subscribingshutdown():
 
 def subscribingpoweron():
     client.unsubscribe(ShutdownTopic)
-    client.subscribe(PowerOnTopic)
+    client.subscribe(GUDEcommandtopic)
     client.on_message = on_messagepoweron
 
 
