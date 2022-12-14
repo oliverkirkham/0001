@@ -7,12 +7,12 @@ import threading
 import os
 
 
-broker="192.168.11.47"
+broker="127.0.0.1"
 port=1883 #broker port (default is 1883)
 GudeID="OR1" #ID of the controlled gude
 ShutdownTopic="com/jonesav/androidscreen/shutdown"
 GudePowerTopic="com/jonesav/androidscreen/shutdown/confirm"
-GUDEcommandtopic="jonesav/secretbox/{}/cmd/cli".format(GudeID)
+GUDEcommandtopic="com/jonesav/secretbox/{}/cmd/cli".format(GudeID)
 shutdowndelay=60 #delay in seconds between shutdown command received and power off sent
 powerstate=2 #powerstate of the GUDE
 refresh = 5 #refresh rate of the data on the android screen (in seconds per frame) anything lower than 5 causes weird behavior
@@ -32,8 +32,8 @@ def on_connect(client, userdata, flags, rc): #on connecting to broker print erro
 
 def on_messageshutdown(client, userdata, msg,): #on shutdown message confirm recived then wait 60 s
     global powerstate
-    wow = msg.payload.decode('UTF-8')
-    print("Command Received:", wow, "Preparing to Shutdown")
+    decodedmessage = msg.payload.decode('UTF-8')
+    print("Command Received:", decodedmessage, "Preparing to Shutdown")
     msgs = [{'topic':GudePowerTopic, 'payload':'AZ5'}]
     publish.multiple(msgs, hostname=broker)
     print("shutdown confirm sent")
@@ -52,9 +52,9 @@ def on_messagepoweron(client, userdata, msg): #on reciving power on message
     wow = msg.payload.decode('UTF-8')
     if wow == "port all set 1":
         powerstate = (1)
-        msgs = [{'topic':"OliverK/test/kwh", 'payload':round(0, 2)},
-        ("OliverK/test/co2", round(0, 2), 0, False),
-        ("OliverK/test/money", round(0, 2), 0, False)]
+        msgs = [{'topic':"com/jonesav/androidscreen/data/kwh", 'payload':round(0, 2)},
+        ("com/jonesav/androidscreen/data/co2", round(0, 2), 0, False),
+        ("com/jonesav/androidscreen/data/money", round(0, 2), 0, False)]
         publish.multiple(msgs, hostname=broker)
         print("message received powering on:", wow, powerstate)
         client.unsubscribe(GUDEcommandtopic)
@@ -73,9 +73,9 @@ def powersavingscalc(powersaved): #power savings calculation
         co2saved=(powersaved*co2multi)
         moneysaved=(powersaved*cpkwh)
         print("powersaved", round(powersaved, 3), "Co2 Saved", round(co2saved, 3), "Money Saved", round(moneysaved, 3))
-        msgs = [{'topic':"OliverK/test/kwh", 'payload':round(powersaved, 2)},
-        ("OliverK/test/co2", round(co2saved, 2), 0, False),
-        ("OliverK/test/money", round(moneysaved, 2), 0, False)]
+        msgs = [{'topic':"com/jonesav/androidscreen/data/kwh", 'payload':round(powersaved, 2)},
+        ("com/jonesav/androidscreen/data/co2", round(co2saved, 2), 0, False),
+        ("com/jonesav/androidscreen/data/money", round(moneysaved, 2), 0, False)]
         publish.multiple(msgs, hostname=broker)
         powersaved=(powersaved+(KwH/(3600/refresh)))
         sleep(refresh)
