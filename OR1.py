@@ -5,7 +5,7 @@ import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 import threading
 import os
-
+#
 
 broker="192.168.11.47"
 port=1883 #broker port (default is 1883)
