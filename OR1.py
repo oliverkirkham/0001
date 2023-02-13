@@ -7,7 +7,7 @@ import threading
 import os
 
 
-broker="192.168.11.47"
+broker="192.168.11.11"
 port=1883 #broker port (default is 1883)
 GudeID="OR1" #ID of the controlled gude
 ShutdownTopic="com/jonesav/androidscreen/shutdown"
